@@ -27,10 +27,13 @@ CLIENT = slack.WebClient(token=SETTINGS.SLACK_API_TOKEN, ssl=SSL_CONTEXT)
 def send_slack_message(text: str = None,
                        blocks: list = None,
                        channel: str = SETTINGS.SLACK_CHANNEL):
-    """
-    Sends a slack message.
-    @param {string} text When specified, plain text is sent.
-    @param {list} text When specified, a 'block' is sent.
+    """Sends a slack message.
+
+    Attributes:
+        text: When specified, plain text is sent.
+        blocks: When specified, a 'block' is sent.
+        channel: The slack channel to send to.
+
     """
     if not text and not blocks:
         raise argparse.ArgumentError
