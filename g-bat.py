@@ -23,15 +23,13 @@ Example:
     queried via BigQuery.
 
 Attributes:
-    Settings: See `settings.py` for more information.
+    SETTINGS: See `settings.py` for more information.
     CLIENT: The BigQuery client.
 
 """
 
 
 import calendar
-import json
-import os
 
 from datetime import date
 from typing import Union
@@ -306,7 +304,7 @@ def get_costs(project_ids: list) -> list:
             'status': status
         }
 
-        # Investigate if the status is `SETTINGS.STATUS_WARNING`
+        # Get info on highest costing services if `SETTINGS.STATUS_WARNING`
         if status == SETTINGS.STATUS_WARNING:
             project_costs['top_services'] = get_gcp_project_daily_top_services(
                 project_id
