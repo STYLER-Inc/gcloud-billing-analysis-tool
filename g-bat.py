@@ -189,7 +189,7 @@ def get_gcp_project_daily_top_services(
     """
     query = (
         f"""
-        SELECT 
+        SELECT
           SUM(cost) as cost,
           service.description as service_desc,
           currency as currency,
@@ -296,7 +296,7 @@ def get_costs(project_ids: list) -> list:
         one_day_ago = get_cost_filter_project_daily_interval(project_id, 1)
         two_days_ago = get_cost_filter_project_daily_interval(project_id, 2)
         status = get_status(one_day_ago['cost'], two_days_ago['cost'])
-        
+
         project_costs = {
             'id': project_id,
             'one_day_ago': one_day_ago,
@@ -469,7 +469,7 @@ def send_project_ranking_line_to_slack(rank: int, project_data: dict) -> None:
     title = format_project_title(rank,
                                  project_data['id'],
                                  project_data['status'])
-    past_day = (f"{project_data['one_day_ago']['cost']} " + 
+    past_day = (f"{project_data['one_day_ago']['cost']} " +
                 f"{project_data['one_day_ago']['currency']}")
     send_slack_message(blocks=[
         make_slack_message_field_section(
@@ -591,7 +591,6 @@ def slack_notify() -> None:
     # Prepare and send trailing overally summary
     send_slack_message(blocks=[make_slack_message_divider()])
     send_summary_to_slack(analysis_data['summary'])
-
 
 
 if __name__ == '__main__':
