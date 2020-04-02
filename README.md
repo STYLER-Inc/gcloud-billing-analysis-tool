@@ -25,3 +25,9 @@ Run tests:
 ```shell script
 pipenv run pytest --cov-report=html --cov=tests
 ```
+
+Before checking in, keep the code clean!
+
+```shell script
+pipenv run pylint **/*.py
+```
