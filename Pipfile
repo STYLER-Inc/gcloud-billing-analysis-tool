@@ -11,6 +11,8 @@ certifi = "*"
 google-cloud-pubsub = "*"
 oauth2client = "*"
 google-cloud-bigquery = "*"
+pytest = "*"
+pytest-cov = "*"
 
 [requires]
 python_version = "3.8"
