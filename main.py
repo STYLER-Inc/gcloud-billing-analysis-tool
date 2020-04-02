@@ -36,13 +36,23 @@ from typing import Union
 
 from google.cloud import bigquery
 
-from messenger import send_slack_message
+from messenger import send_slack_message as send_slack_message_to_channel
 from settings import Settings
 
 
 SETTINGS = Settings()
-CLIENT = bigquery.Client()
 
+def send_slack_message(text: str = None,
+                       blocks: list = None):
+    """Wraps the messenger slack message, adding on a slack channel from settings
+    """
+    send_slack_message_to_channel(
+        channel=SETTINGS.SLACK_CHANNEL,
+        api_token=SETTINGS.SLACK_API_TOKEN,
+        text=text,
+        blocks=blocks
+    )
+    
 
 def get_project_ids() -> list:
     """Gets a list of all project IDs within the billing data from BigQuery.
@@ -594,4 +604,6 @@ def slack_notify() -> None:
 
 
 if __name__ == '__main__':
+    SETTINGS.load_from_environment()
+    CLIENT = bigquery.Client()
     slack_notify()

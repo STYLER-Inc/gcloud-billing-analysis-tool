@@ -45,7 +45,7 @@ class Settings:
     STATUS_WARNING = 'WARNING'
     STATUS_NOMINAL = 'NOMINAL'
 
-    def __init__(self):
+    def load_from_environment(self):
         if 'PROJECT_ID' in os.environ:
             self.PROJECT_ID = os.environ['PROJECT_ID']
         else:
