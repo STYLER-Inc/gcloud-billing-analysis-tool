@@ -49,28 +49,28 @@ class Settings:
         if 'PROJECT_ID' in os.environ:
             self.PROJECT_ID = os.environ['PROJECT_ID']
         else:
-            raise Exception('Must specify PROJECT_ID') 
-        
+            raise Exception('Must specify PROJECT_ID')
+
         # Required
         if 'DATA_SET' in os.environ:
             self.DATA_SET = os.environ['DATA_SET']
         else:
-            raise Exception('Must specify DATA_SET') 
+            raise Exception('Must specify DATA_SET')
 
         if 'TABLE_NAME' in os.environ:
             self.TABLE_NAME = os.environ['TABLE_NAME']
         else:
-            raise Exception('Must specify TABLE_NAME') 
+            raise Exception('Must specify TABLE_NAME')
 
         if 'SLACK_CHANNEL' in os.environ:
             self.SLACK_CHANNEL = os.environ['SLACK_CHANNEL']
         else:
-            raise Exception('Must specify SLACK_CHANNEL') 
+            raise Exception('Must specify SLACK_CHANNEL')
 
         if 'SLACK_API_TOKEN' in os.environ:
             self.SLACK_API_TOKEN = os.environ['SLACK_API_TOKEN']
         else:
-            raise Exception('Must specify SLACK_API_TOKEN') 
+            raise Exception('Must specify SLACK_API_TOKEN')
 
         # General Settings
         if 'MINIMUM_COST_FOR_WARNING' in os.environ:
