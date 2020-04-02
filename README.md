@@ -1,4 +1,4 @@
-# GCP Billing Analysis Tool (G-BAT) (for BigQuery)
+# GCP Billing Analysis Tool (for BigQuery)
 This module is written to analyse Google Cloud Platform billing data
 that has been exported to billing via the automatic export feature.
 
@@ -14,7 +14,7 @@ $ PROJECT_ID="project-id" \
         TABLE_NAME="table-name-in-dataset" \
         SLACK_API_TOKEN="your-slack-api-token" \
         GOOGLE_APPLICATION_CREDENTIALS="path-to-creds.json" \
-        pipenv run python g-bat.py
+        pipenv run python main.py
 ```
 See `settings.py` for other settings.
 
