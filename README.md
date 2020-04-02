@@ -18,7 +18,7 @@ $ PROJECT_ID="project-id" \
 ```
 See `settings.py` for other settings.
 
-## Coding
+## Coding
 
 Run tests:
 
