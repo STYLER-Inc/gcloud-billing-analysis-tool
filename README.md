@@ -17,3 +17,11 @@ $ PROJECT_ID="project-id" \
         pipenv run python g-bat.py
 ```
 See `settings.py` for other settings.
+
+## Coding
+
+Run tests:
+
+```shell script
+pipenv run pytest --cov-report=html --cov=tests
+```
