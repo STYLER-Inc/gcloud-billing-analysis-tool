@@ -17,3 +17,11 @@ $ PROJECT_ID="project-id" \
         pipenv run python g-bat.py
 ```
 See `settings.py` for other settings.
+
+## Coding
+
+Before checking in, keep the code clean!
+
+```shell script
+pipenv run pylint **/*.py
+```
