@@ -23,7 +23,7 @@ See `settings.py` for other settings.
 Run tests:
 
 ```shell script
-pipenv run pytest --cov-report=html --cov=tests
+pipenv run pytest --cov-report=html --cov=*
 ```
 
 Before checking in, keep the code clean!
