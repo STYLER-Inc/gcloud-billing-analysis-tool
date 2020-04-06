@@ -1,0 +1,13 @@
+steps:
+- id: 'build-tests-container'
+  name: 'gcr.io/kaniko-project/executor:v0.16.0'
+  args: ["--dockerfile=Dockerfile",
+          "--cache=true",
+          "--cache-ttl=6h",
+          "--destination=asia.gcr.io/$PROJECT_ID/python-cloudbuild"]
+
+- id: 'run-pylint'
+  name: 'asia.gcr.io/$PROJECT_ID/python-cloudbuild'
+  entrypoint: 'pipenv'
+  args: ['run', 'pytest', '--cov-report=html', '--cov=*']
+  waitFor: ['build-tests-container']
