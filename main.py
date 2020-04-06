@@ -612,7 +612,8 @@ def slack_notify() -> None:
 
     # Send project ranking line to Slack
     for rank, project_data in enumerate(analysis_data['breakdown'], start=1):
-        if project_data['cost'] > 0:
+        # Do not report if there was no cost in the past day
+        if project_data['one_day_ago']['cost'] > 0:
             send_project_ranking_line_to_slack(rank, project_data)
 
             # Send top services if given
