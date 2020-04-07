@@ -5,9 +5,7 @@ RUN pip install pipenv
 
 FROM test-base AS test-overlay
 
-COPY ./Pipfile* /app/
-WORKDIR /app
-
-ENV PIPENV_PIPFILE /app/Pipfile
+COPY ./Pipfile* /workspace/
+WORKDIR /workspace
 
 RUN pipenv install --dev
