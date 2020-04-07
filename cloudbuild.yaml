@@ -8,7 +8,6 @@ steps:
 
 - id: 'run-pylint'
   name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
-  workdir: '/workspace'
   entrypoint: 'pipenv'
   args: ['run', 'pytest', '--cov-report=html', '--cov=*']
   waitFor: ['build-tests-container']
