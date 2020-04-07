@@ -3,17 +3,23 @@ steps:
   name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/python-cloudbuild-tests', '--target', 'test-overlay', '.' ]
 
-- id: 'run-pylint'
-  name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
-  entrypoint: 'pylint'
-  args: ['/workspace/']
-  waitFor: ['build-test-container']
-
+  # Runs the tests and generates a coverage report.
+  #
+  # /workspace is mounted by cloudbuild as a volume by default.
+  # Therefore, changes will persist.
+  #
+  # You can run the linting with whichever output you need to
+  # upload to sonarcloud in this fashion too.
 - id: 'run-pytest'
   name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
-  entrypoint: 'bash'
-  args: ['-c', 'cd', '/workspace', '&&',
-         '--cov-report=html',
-         '--cov=*',
-         '/workspace/']
+  entrypoint: 'pytest'
+  args: ['--cov-report=html', '--cov=.']
   waitFor: ['build-test-container']
+
+  # Remove this: Added as an example step only, to demonstrate persistence.
+- id: 'confirm'
+  name: 'gcr.io/cloud-builders/gcloud'
+  entrypoint: 'ls'
+  args: ['-l', 'htmlcov']
+  waitFor: ['run-pytest']
+
