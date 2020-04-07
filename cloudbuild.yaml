@@ -1,30 +1,19 @@
 steps:
-- id: 'build-tests-container'
-  name: 'gcr.io/kaniko-project/executor'
-  args: ["--dockerfile=Dockerfile",
-          "--cache=false",
-          "--destination=gcr.io/$PROJECT_ID/python-cloudbuild"]
-
-- id: 'pipenv-install'
-  name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
-  entrypoint: 'pipenv'
-  args: ['install', '--dev']
-  waitFor: ['build-tests-container']
+- id: 'build-test-container'
+  name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/python-cloudbuild-tests', '--target', 'test-overlay', '.' ]
 
 - id: 'run-pylint'
-  name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
-  entrypoint: 'pipenv'
-  args: ['run', 'pylint', '**/*.py']
-  waitFor: ['pipenv-install']
+  name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
+  entrypoint: 'pylint'
+  args: ['/workspace/']
+  waitFor: ['build-test-container']
 
 - id: 'run-pytest'
-  name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
-  entrypoint: 'pipenv'
-  args: ['run', 'pytest', '--cov-report=html', '--cov=*']
-  waitFor: ['pipenv-install']
-
-# - id: 'run-sonarcloud'
-#   name: 'sonarcloud'
-#   entrypoint: 'sonarcloud'
-#   args: ['upload']
-#   waitFor: ['pipenv-pytest', 'run-pylint']
+  name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
+  entrypoint: 'bash'
+  args: ['-c', 'cd', '/workspace', '&&',
+         '--cov-report=html',
+         '--cov=*',
+         '/workspace/']
+  waitFor: ['build-test-container']
