@@ -23,8 +23,17 @@ steps:
   args: ['run', 'pytest', '--cov-report=html', '--cov=*']
   waitFor: ['pipenv-install']
 
-# - id: 'run-sonarcloud'
-#   name: 'sonarcloud'
-#   entrypoint: 'sonarcloud'
-#   args: ['upload']
-#   waitFor: ['pipenv-pytest', 'run-pylint']
+- id: 'upload-to-sonarcloud'
+  name: 'gcr.io/$PROJECT_ID/sonar-scanner:latest'
+  args:
+    - '-Dsonar.host.url=https://sonarcloud.io'
+    - '-Dsonar.login=${sonarcloudLogin}'
+    - '-Dsonar.projectKey=STYLER-Inc_gcloud-billing-analysis-tool'
+    - '-Dsonar.organization=styler-inc'
+    - '-Dsonar.sources=.'
+  secretEnv: ['sonarcloudLogin']
+
+secrets:
+- kmsKeyName: secret/gcloud-billing-analysis-tool
+  secretEnv:
+    sonarcloudLogin: CiQA4VLMkJlznj/3dO1t3kGXthOFpCRBHRKN6CUHM+X6pz/eiMsSUgAf4zour3S+8fyyXpztYOAhtXaw+ggvkBWTK2g+GO+ovDVkTZ7wSbaKi5xKHKxd8krYzoZwwotODxVLAC3HpT0PQe7nOAEDv4f6opTUKCpMwgQ=
