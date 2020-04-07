@@ -36,7 +36,6 @@ steps:
   - '.'
   - '-f'
   - 'Sonar.Dockerfile'
-  waitFor: ['']
 
 - id: 'upload-to-sonarcloud'
   name: 'gcr.io/${PROJECT_ID}/sonar-scanner:latest'
