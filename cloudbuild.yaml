@@ -1,9 +1,8 @@
 steps:
 - id: 'build-tests-container'
-  name: 'gcr.io/kaniko-project/executor:v0.16.0'
+  name: 'gcr.io/kaniko-project/executor'
   args: ["--dockerfile=Dockerfile",
-          "--cache=true",
-          "--cache-ttl=6h",
+          "--cache=false",
           "--destination=gcr.io/$PROJECT_ID/python-cloudbuild"]
 
 - id: 'pipenv-install'
@@ -23,3 +22,9 @@ steps:
   entrypoint: 'pipenv'
   args: ['run', 'pytest', '--cov-report=html', '--cov=*']
   waitFor: ['pipenv-install']
+
+# - id: 'run-sonarcloud'
+#   name: 'sonarcloud'
+#   entrypoint: 'sonarcloud'
+#   args: ['upload']
+#   waitFor: ['pipenv-pytest', 'run-pylint']
