@@ -15,5 +15,11 @@ steps:
 - id: 'run-pylint'
   name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
   entrypoint: 'pipenv'
+  args: ['run', 'pylint', '**/*.py']
+  waitFor: ['pipenv-install']
+
+- id: 'run-pytest'
+  name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
+  entrypoint: 'pipenv'
   args: ['run', 'pytest', '--cov-report=html', '--cov=*']
   waitFor: ['pipenv-install']
