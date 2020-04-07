@@ -14,13 +14,13 @@ steps:
 - id: 'run-pylint'
   name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
   entrypoint: 'bash'
-  args: ['-c', 'pipenv run pylint **/*.py']
+  args: ['-c', 'pipenv run pylint **/*.py || exit 0']
   waitFor: ['pipenv-install']
 
 - id: 'run-pytest'
   name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
-  entrypoint: 'pipenv'
-  args: ['run', 'pytest', '--cov-report=html', '--cov=*']
+  entrypoint: 'bash'
+  args: ['-c', 'pipenv run pytest --cov-report=html --cov=* || exit 0']
   waitFor: ['pipenv-install']
 
 - id: 'build-sonar-scanner'
@@ -36,6 +36,7 @@ steps:
   - '.'
   - '-f'
   - 'Sonar.Dockerfile'
+  waitFor: ['']
 
 - id: 'upload-to-sonarcloud'
   name: 'gcr.io/${PROJECT_ID}/sonar-scanner:latest'
@@ -46,6 +47,7 @@ steps:
     - '-Dsonar.organization=styler-inc'
     - '-Dsonar.sources=.'
   secretEnv: ['sonarcloudLogin']
+  waitFor: ['build-sonar-scanner', 'run-pylint', 'run-pytest']
 
 secrets:
 - kmsKeyName: projects/facy-development/locations/global/keyRings/gcloud-billing-analysis-tool-build
