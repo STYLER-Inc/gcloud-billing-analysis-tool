@@ -14,7 +14,7 @@ steps:
 - id: 'run-pylint'
   name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
   entrypoint: 'bash'
-  args: ['-c', 'pipenv', 'run', 'pylint', '**/*.py']
+  args: ['-c', 'pipenv run pylint **/*.py']
   waitFor: ['pipenv-install']
 
 - id: 'run-pytest'
@@ -24,7 +24,7 @@ steps:
   waitFor: ['pipenv-install']
 
 - id: 'upload-to-sonarcloud'
-  name: 'gcr.io/$PROJECT_ID/sonar-scanner:latest'
+  name: 'gcr.io/cloud-builders/sonar-scanner:latest'
   args:
     - '-Dsonar.host.url=https://sonarcloud.io'
     - '-Dsonar.login=${sonarcloudLogin}'
