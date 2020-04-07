@@ -13,8 +13,8 @@ steps:
 
 - id: 'run-pylint'
   name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
-  entrypoint: 'pipenv'
-  args: ['run', 'pylint', '**/*.py']
+  entrypoint: 'bash'
+  args: ['-c', 'pipenv', 'run', 'pylint', '**/*.py']
   waitFor: ['pipenv-install']
 
 - id: 'run-pytest'
