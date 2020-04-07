@@ -4,10 +4,10 @@ steps:
   args: ["--dockerfile=Dockerfile",
           "--cache=true",
           "--cache-ttl=6h",
-          "--destination=asia.gcr.io/$PROJECT_ID/python-cloudbuild"]
+          "--destination=gcr.io/$PROJECT_ID/python-cloudbuild"]
 
 - id: 'run-pylint'
-  name: 'asia.gcr.io/$PROJECT_ID/python-cloudbuild'
+  name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
   entrypoint: 'pipenv'
   args: ['run', 'pytest', '--cov-report=html', '--cov=*']
   waitFor: ['build-tests-container']
