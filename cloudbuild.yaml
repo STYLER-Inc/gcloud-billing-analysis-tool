@@ -23,8 +23,22 @@ steps:
   args: ['run', 'pytest', '--cov-report=html', '--cov=*']
   waitFor: ['pipenv-install']
 
+- id: 'build-sonar-scanner'
+  name: 'gcr.io/cloud-builders/docker'
+  args: 
+  - 'build'
+  - '--build-arg'
+  - 'SONARQUBE_SCANNER_CLI_VERSION=3.2.0.1227'
+  - '-t'
+  - 'gcr.io/$PROJECT_ID/sonar-scanner:latest'
+  - '-t'
+  - 'gcr.io/$PROJECT_ID/sonar-scanner:3.2.0.1227'
+  - '.'
+  - '-f'
+  - 'Sonar.Dockerfile'
+
 - id: 'upload-to-sonarcloud'
-  name: 'gcr.io/cloud-builders/sonar-scanner:latest'
+  name: 'gcr.io/${PROJECT_ID}/sonar-scanner:latest'
   args:
     - '-Dsonar.host.url=https://sonarcloud.io'
     - '-Dsonar.login=${sonarcloudLogin}'
