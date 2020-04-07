@@ -6,8 +6,14 @@ steps:
           "--cache-ttl=6h",
           "--destination=gcr.io/$PROJECT_ID/python-cloudbuild"]
 
+- id: 'pipenv-install'
+  name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
+  entrypoint: 'pipenv'
+  args: ['install']
+  waitFor: ['build-tests-container']
+
 - id: 'run-pylint'
   name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
   entrypoint: 'pipenv'
   args: ['run', 'pytest', '--cov-report=html', '--cov=*']
-  waitFor: ['build-tests-container']
+  waitFor: ['pipenv-install']
