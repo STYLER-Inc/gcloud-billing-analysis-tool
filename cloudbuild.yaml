@@ -34,6 +34,6 @@ steps:
   secretEnv: ['sonarcloudLogin']
 
 secrets:
-- kmsKeyName: secret/gcloud-billing-analysis-tool
+- kmsKeyName: projects/facy-development/locations/global/keyRings/gcloud-billing-analysis-tool-build
   secretEnv:
     sonarcloudLogin: CiQA4VLMkJlznj/3dO1t3kGXthOFpCRBHRKN6CUHM+X6pz/eiMsSUgAf4zour3S+8fyyXpztYOAhtXaw+ggvkBWTK2g+GO+ovDVkTZ7wSbaKi5xKHKxd8krYzoZwwotODxVLAC3HpT0PQe7nOAEDv4f6opTUKCpMwgQ=
