@@ -627,6 +627,10 @@ def slack_notify() -> None:
     send_summary_to_slack(analysis_data['summary'])
 
 
+def subscriber(data: dict, context: dict):
+    slack_notify()
+
+
 if __name__ == '__main__':
     SETTINGS.load_from_environment()
     CLIENT = bigquery.Client()
