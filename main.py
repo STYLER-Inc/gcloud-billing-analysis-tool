@@ -31,7 +31,7 @@ Attributes:
 
 import calendar
 
-from datetime import date
+from datetime import date, timedelta
 from typing import Union
 
 from google.cloud import bigquery
@@ -54,8 +54,9 @@ def send_slack_message(text: str = None,
     )
     
 
-def get_project_ids() -> list:
+def get_project_ids_with_monthly_cost() -> list:
     """Gets a list of all project IDs within the billing data from BigQuery.
+    Does not include projects for which cost was 0 in the past month.
 
     Returns:
         Project ID(s)
@@ -64,7 +65,13 @@ def get_project_ids() -> list:
     query = (
         f"""
         SELECT DISTINCT project.id AS pid
-        FROM {SETTINGS.PROJECT_ID}.{SETTINGS.DATA_SET}.{SETTINGS.TABLE_NAME};
+        FROM {SETTINGS.PROJECT_ID}.{SETTINGS.DATA_SET}.{SETTINGS.TABLE_NAME}
+        WHERE
+          _PARTITIONTIME BETWEEN TIMESTAMP_TRUNC(
+            CURRENT_TIMESTAMP(), MONTH, 'UTC')
+          AND TIMESTAMP_TRUNC(CURRENT_TIMESTAMP(), DAY, 'UTC')
+          AND project.id IS NOT NULL
+          AND cost > 0;
         """)
     query_job = CLIENT.query(query)
     return [row.pid for row in query_job.result() if row.pid is not None]
@@ -119,10 +126,17 @@ def get_cost_filter_project_daily_interval(project_id: str,
     query_job = CLIENT.query(query)
     rows_iter = query_job.result(max_results=1)
     rows = list(rows_iter)
-    return {
-        'cost': round_cost_value(rows[0].cost),
-        'currency': rows[0].currency,
-        'date': rows[0].date.isoformat()
+
+    if rows:
+        return {
+            'cost': round_cost_value(rows[0].cost),
+            'currency': rows[0].currency,
+            'date': rows[0].date.isoformat()
+        }
+    return {  # Default, when there's no data.
+        'cost': 0.0,
+        'currency': '',
+        'date': (date.today() - timedelta(days=days_ago)).isoformat()
     }
 
 
@@ -149,10 +163,18 @@ def get_gcp_daily_total_cost() -> dict:
     query_job = CLIENT.query(query)
     rows_iter = query_job.result(max_results=1)
     rows = list(rows_iter)
-    return {
-        'cost_sum': round_cost_value(rows[0].cost_sum),
-        'currency': rows[0].currency,
-        'date': rows[0].date.isoformat()
+
+    if rows:
+        return {
+            'cost_sum': round_cost_value(rows[0].cost_sum),
+            'currency': rows[0].currency,
+            'date': rows[0].date.isoformat()
+        }
+    one_month_ago = date.today().replace(day=1) - timedelta(days=1)
+    return {  # Default, when there's no data.
+        'cost_sum': 0.0,
+        'currency': '',
+        'date': f'{one_month_ago.year}-{one_month_ago.month}'
     }
 
 
@@ -302,7 +324,7 @@ def get_costs(project_ids: list) -> list:
         Cost data for all projects, with the `project_id` as the uppermost key.
     """
     costs = []
-    for project_id in get_project_ids():
+    for project_id in get_project_ids_with_monthly_cost():
         one_day_ago = get_cost_filter_project_daily_interval(project_id, 1)
         two_days_ago = get_cost_filter_project_daily_interval(project_id, 2)
         status = get_status(one_day_ago['cost'], two_days_ago['cost'])
@@ -357,7 +379,7 @@ def get_analysis() -> dict:
                                         past_month['cost_sum'])
 
     # Get and sort breakdown based on most expensive cost
-    breakdown = get_costs(get_project_ids())
+    breakdown = get_costs(get_project_ids_with_monthly_cost())
     sorted_breakdown = sorted(
         breakdown,
         key=lambda x: x['one_day_ago']['cost'],
@@ -590,13 +612,15 @@ def slack_notify() -> None:
 
     # Send project ranking line to Slack
     for rank, project_data in enumerate(analysis_data['breakdown'], start=1):
-        send_project_ranking_line_to_slack(rank, project_data)
+        # Do not report if there was no cost in the past day
+        if project_data['one_day_ago']['cost'] > 0:
+            send_project_ranking_line_to_slack(rank, project_data)
 
-        # Send top services if given
-        if 'top_services' in project_data.keys():
-            send_project_top_services_to_slack(
-                project_data['id'],
-                project_data['top_services'])
+            # Send top services if given
+            if 'top_services' in project_data.keys():
+                send_project_top_services_to_slack(
+                    project_data['id'],
+                    project_data['top_services'])
 
     # Prepare and send trailing overally summary
     send_slack_message(blocks=[make_slack_message_divider()])
