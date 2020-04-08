@@ -41,6 +41,8 @@ from settings import Settings
 
 
 SETTINGS = Settings()
+SETTINGS.load_from_environment()
+CLIENT = bigquery.Client()
 
 def send_slack_message(text: str = None,
                        blocks: list = None):
@@ -632,6 +634,4 @@ def subscriber(data: dict, context: dict):
 
 
 if __name__ == '__main__':
-    SETTINGS.load_from_environment()
-    CLIENT = bigquery.Client()
     slack_notify()
