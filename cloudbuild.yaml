@@ -38,6 +38,7 @@ steps:
     - '-Dsonar.host.url=https://sonarcloud.io'
     - '-Dsonar.login=55265562222489010940c4945586e6f6d80d2688'
     - '-Dsonar.python.pylint.reportPath=pylint.log'
+    - '-Dsonar.pullrequest.key=_PR_NUMBER'
   secretEnv: ['sonarcloudLogin']
   waitFor: ['build-sonar-scanner', 'run-pylint', 'run-pytest']
 
