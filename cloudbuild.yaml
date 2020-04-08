@@ -1,38 +1,30 @@
 steps:
-- id: 'build-tests-container'
-  name: 'gcr.io/kaniko-project/executor'
-  args: ["--dockerfile=Dockerfile",
-          "--cache=false",
-          "--destination=gcr.io/$PROJECT_ID/python-cloudbuild"]
-
-- id: 'pipenv-install'
-  name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
-  entrypoint: 'pipenv'
-  args: ['install', '--dev']
-  waitFor: ['build-tests-container']
+- id: 'build-test-container'
+  name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/python-cloudbuild-tests', '--target', 'test-overlay', '.' ]
 
 - id: 'run-pylint'
-  name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
+  name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
   entrypoint: 'bash'
-  args: ['-c', 'pipenv run pylint **/*.py || exit 0']
-  waitFor: ['pipenv-install']
+  args: ['-c', '(pipenv run pylint **/*.py -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > pylint.log) || exit 0']
+  waitFor: ['build-test-container']
 
 - id: 'run-pytest'
-  name: 'gcr.io/$PROJECT_ID/python-cloudbuild'
+  name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
   entrypoint: 'bash'
-  args: ['-c', 'pipenv run pytest --cov-report=html --cov=* || exit 0']
-  waitFor: ['pipenv-install']
+  args: ['-c', 'pipenv run coverage run --source=. --module pytest && pipenv run coverage xml || exit 0']
+  waitFor: ['build-test-container']
 
 - id: 'build-sonar-scanner'
   name: 'gcr.io/cloud-builders/docker'
   args: 
   - 'build'
   - '--build-arg'
-  - 'SONARQUBE_SCANNER_CLI_VERSION=3.2.0.1227'
+  - 'SONARQUBE_SCANNER_CLI_VERSION=4.2.0.1873'
   - '-t'
   - 'gcr.io/$PROJECT_ID/sonar-scanner:latest'
   - '-t'
-  - 'gcr.io/$PROJECT_ID/sonar-scanner:3.2.0.1227'
+  - 'gcr.io/$PROJECT_ID/sonar-scanner:4.2.0.1873'
   - '.'
   - '-f'
   - 'Sonar.Dockerfile'
@@ -40,15 +32,16 @@ steps:
 - id: 'upload-to-sonarcloud'
   name: 'gcr.io/${PROJECT_ID}/sonar-scanner:latest'
   args:
-    - '-Dsonar.host.url=https://sonarcloud.io'
-    - '-Dsonar.login=${sonarcloudLogin}'
-    - '-Dsonar.projectKey=STYLER-Inc_gcloud-billing-analysis-tool'
     - '-Dsonar.organization=styler-inc'
+    - '-Dsonar.projectKey=STYLER-Inc_gcloud-billing-analysis-tool'
     - '-Dsonar.sources=.'
+    - '-Dsonar.host.url=https://sonarcloud.io'
+    - '-Dsonar.login=55265562222489010940c4945586e6f6d80d2688'
+    - '-Dsonar.python.pylint.reportPath=pylint.log'
   secretEnv: ['sonarcloudLogin']
   waitFor: ['build-sonar-scanner', 'run-pylint', 'run-pytest']
 
 secrets:
-- kmsKeyName: projects/facy-development/locations/global/keyRings/gcloud-billing-analysis-tool-build
+- kmsKeyName: projects/facy-development/locations/global/keyRings/gcloud-billing-analysis-tool-build/cryptoKeys/sonarcloudLogin
   secretEnv:
     sonarcloudLogin: CiQA4VLMkJlznj/3dO1t3kGXthOFpCRBHRKN6CUHM+X6pz/eiMsSUgAf4zour3S+8fyyXpztYOAhtXaw+ggvkBWTK2g+GO+ovDVkTZ7wSbaKi5xKHKxd8krYzoZwwotODxVLAC3HpT0PQe7nOAEDv4f6opTUKCpMwgQ=
