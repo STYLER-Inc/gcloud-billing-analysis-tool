@@ -40,7 +40,6 @@ steps:
     - '-Dsonar.python.pylint.reportPath=pylint.log'
     - '-Dsonar.python.coverage.reportPaths=coverage.xml'
     - '-Dsonar.pullrequest.key=$_PR_NUMBER'
-    - '-Dsonar.scm.provider=git'
   secretEnv: ['sonarcloudLogin']
   waitFor: ['build-sonar-scanner', 'run-pylint', 'run-pytest']
 
