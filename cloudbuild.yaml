@@ -47,6 +47,7 @@ steps:
     - '-Dsonar.organization=styler-inc'
     - '-Dsonar.projectKey=STYLER-Inc_gcloud-billing-analysis-tool'
     - '-Dsonar.sources=.'
+    - '-Dsonar.language=py'
     - '-Dsonar.host.url=https://sonarcloud.io'
     - '-Dsonar.login=55265562222489010940c4945586e6f6d80d2688'
     - '-Dsonar.python.pylint.reportPath=pylint.log'
