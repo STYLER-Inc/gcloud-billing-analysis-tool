@@ -6,7 +6,7 @@ steps:
   args: ['remote', 'add', 'origin', '$_HEAD_REPO_URL']
 
 - name: gcr.io/cloud-builders/git
-  args: ['fetch', 'master']
+  args: ['fetch', 'origin', 'master']
 
 - id: 'build-test-container'
   name: 'gcr.io/cloud-builders/docker'
