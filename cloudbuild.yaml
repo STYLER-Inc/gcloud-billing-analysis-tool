@@ -1,9 +1,12 @@
 steps:
 - name: gcr.io/cloud-builders/git
-  args: ['clone', '$_HEAD_REPO_URL']
+  args: ['init', '.']
 
 - name: gcr.io/cloud-builders/git
-  args: ['fetch', '--unshallow']
+  args: ['remote', 'add', '-t', '\*', '-f', 'origin', '$_HEAD_REPO_URL']
+
+- name: gcr.io/cloud-builders/git
+  args: ['fetch', 'master']
 
 - id: 'build-test-container'
   name: 'gcr.io/cloud-builders/docker'
