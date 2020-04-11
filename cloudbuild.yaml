@@ -9,7 +9,7 @@ steps:
   args: ['fetch', '--all']
 
 - name: gcr.io/cloud-builders/git
-  args: ['checkout', '$_HEAD_BRANCH']
+  args: ['checkout', '-f', '$_HEAD_BRANCH']
 
 - id: 'build-test-container'
   name: 'gcr.io/cloud-builders/docker'
