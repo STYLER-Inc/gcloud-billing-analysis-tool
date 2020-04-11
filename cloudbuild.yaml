@@ -3,7 +3,7 @@ steps:
   args: ['init', '.']
 
 - name: gcr.io/cloud-builders/git
-  args: ['remote', 'add', '-t', '\*', '-f', 'origin', '$REPO_NAME']
+  args: ['remote', 'add', 'origin', '$_HEAD_REPO_URL']
 
 - name: gcr.io/cloud-builders/git
   args: ['fetch', 'master']
