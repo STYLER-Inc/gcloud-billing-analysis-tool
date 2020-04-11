@@ -2,6 +2,10 @@
 """
 
 def my_method():
-    value = 1
-    value = value * 3
-    return value
+    VALUE = 1
+    VALUE = VALUE * 3
+
+
+
+
+    return VALUE
