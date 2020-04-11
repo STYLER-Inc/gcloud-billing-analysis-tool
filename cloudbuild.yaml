@@ -6,6 +6,9 @@ steps:
   args: ['remote', 'add', 'origin', '$_HEAD_REPO_URL']
 
 - name: gcr.io/cloud-builders/git
+  args: ['checkout', '-f', '$_HEAD_BRANCH']
+
+- name: gcr.io/cloud-builders/git
   args: ['fetch', 'origin', 'master']
 
 - id: 'build-test-container'
