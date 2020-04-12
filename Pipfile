@@ -5,6 +5,10 @@ verify_ssl = true
 
 [dev-packages]
 freezegun = "*"
+pytest = "*"
+pytest-cov = "*"
+pylint = "*"
+coverage = "*"
 
 [packages]
 slackclient = "*"
@@ -12,8 +16,6 @@ certifi = "*"
 google-cloud-pubsub = "*"
 oauth2client = "*"
 google-cloud-bigquery = "*"
-pytest = "*"
-pytest-cov = "*"
 
 [requires]
 python_version = "3.8"

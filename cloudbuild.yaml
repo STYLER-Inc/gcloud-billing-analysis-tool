@@ -1,0 +1,46 @@
+# This cloud build _must_ run in a PR trigger,
+# it relies on substitution variables such as the PR number
+steps:
+- id: 'git-checkout'
+  name: gcr.io/$PROJECT_ID/styler-git-checkout
+  args: ['$_HEAD_REPO_URL', '$_HEAD_BRANCH']
+
+- id: 'build-test-container'
+  name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/python-cloudbuild-tests', '--target', 'test-overlay', '.' ]
+  waitFor: ['git-checkout']
+
+- id: 'run-pylint'
+  name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
+  entrypoint: 'bash'
+  args: ['-c', '(pipenv run pylint **/*.py -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > pylint.log) || exit 0']
+  waitFor: ['build-test-container']
+
+- id: 'run-pytest'
+  name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
+  entrypoint: 'bash'
+  args: ['-c', 'pipenv run coverage run --source=. --module pytest && pipenv run coverage xml']
+  waitFor: ['build-test-container']
+
+- id: 'sonarcloud-analysis'
+  name: 'gcr.io/$PROJECT_ID/sonar-scanner:latest'
+  entrypoint: 'bash' # neeed to run in bash to decrypt secret key
+  args:
+    - '-c'
+    - |
+      /launch.sh \
+      -Dsonar.organization=styler-inc \
+      -Dsonar.projectKey=STYLER-Inc_gcloud-billing-analysis-tool \
+      -Dsonar.sources=. \
+      -Dsonar.host.url=https://sonarcloud.io \
+      -Dsonar.login=$$SONARCLOUD_LOGIN \
+      -Dsonar.python.pylint.reportPath=pylint.log \
+      -Dsonar.python.coverage.reportPaths=coverage.xml \
+      -Dsonar.pullrequest.key=$_PR_NUMBER
+  secretEnv: ['SONARCLOUD_LOGIN']
+  waitFor: ['run-pylint', 'run-pytest']
+
+secrets:
+- kmsKeyName: projects/facy-development/locations/global/keyRings/gcloud-billing-analysis-tool-build/cryptoKeys/sonarcloudLogin
+  secretEnv:
+    SONARCLOUD_LOGIN: CiQA4VLMkFZI/hCZ1pVxhSAlGDMbF9eJeBYbbP75W513J4LvClISUgAf4zou85j5wFKtJZFFAfx0Xv8zowoWRci6V98d3AZIStPojLtg0pJqf4Z8ccQmEIm04iK+cnVPdTHopcc5D2EqxA43mjctE7coaUM91GyuMl8= 
