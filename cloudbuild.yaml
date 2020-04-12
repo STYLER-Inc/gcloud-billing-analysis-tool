@@ -24,7 +24,7 @@ steps:
 - id: 'run-pytest'
   name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
   entrypoint: 'bash'
-  args: ['-c', 'pipenv run coverage run --source=. --module pytest && pipenv run coverage xml || exit 0']
+  args: ['-c', 'pipenv run coverage run --source=. --module pytest && pipenv run coverage xml']
   waitFor: ['build-test-container']
 
 - id: 'sonarcloud-analysis'
