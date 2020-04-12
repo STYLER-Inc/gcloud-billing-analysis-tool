@@ -29,14 +29,14 @@ steps:
     - '-Dsonar.projectKey=STYLER-Inc_gcloud-billing-analysis-tool'
     - '-Dsonar.sources=.'
     - '-Dsonar.host.url=https://sonarcloud.io'
-    - '-Dsonar.login=$SONARCLOUD_LOGIN'
+    - '-Dsonar.login=$sonarcloudLogin'
     - '-Dsonar.python.pylint.reportPath=pylint.log'
     - '-Dsonar.python.coverage.reportPaths=coverage.xml'
     - '-Dsonar.pullrequest.key=$_PR_NUMBER'
-  secretEnv: ['SONARCLOUD_LOGIN']
+  secretEnv: ['sonarcloudLogin']
   waitFor: ['run-pylint', 'run-pytest']
 
 secrets:
 - kmsKeyName: projects/facy-development/locations/global/keyRings/gcloud-billing-analysis-tool-build/cryptoKeys/sonarcloudLogin
   secretEnv:
-    SONARCLOUD_LOGIN: CiQA4VLMkFZI/hCZ1pVxhSAlGDMbF9eJeBYbbP75W513J4LvClISUgAf4zou85j5wFKtJZFFAfx0Xv8zowoWRci6V98d3AZIStPojLtg0pJqf4Z8ccQmEIm04iK+cnVPdTHopcc5D2EqxA43mjctE7coaUM91GyuMl8=
+    sonarcloudLogin: CiQA4VLMkFZI/hCZ1pVxhSAlGDMbF9eJeBYbbP75W513J4LvClISUgAf4zou85j5wFKtJZFFAfx0Xv8zowoWRci6V98d3AZIStPojLtg0pJqf4Z8ccQmEIm04iK+cnVPdTHopcc5D2EqxA43mjctE7coaUM91GyuMl8=
