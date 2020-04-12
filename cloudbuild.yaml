@@ -27,21 +27,7 @@ steps:
   args: ['-c', 'pipenv run coverage run --source=. --module pytest && pipenv run coverage xml || exit 0']
   waitFor: ['build-test-container']
 
-- id: 'build-sonar-scanner'
-  name: 'gcr.io/cloud-builders/docker'
-  args: 
-  - 'build'
-  - '--build-arg'
-  - 'SONARQUBE_SCANNER_CLI_VERSION=4.2.0.1873'
-  - '-t'
-  - 'gcr.io/$PROJECT_ID/sonar-scanner:latest'
-  - '-t'
-  - 'gcr.io/$PROJECT_ID/sonar-scanner:4.2.0.1873'
-  - '.'
-  - '-f'
-  - 'Sonar.Dockerfile'
-
-- id: 'upload-to-sonarcloud'
+- id: 'sonarcloud-analysis'
   name: 'gcr.io/${PROJECT_ID}/sonar-scanner:latest'
   args:
     - '-Dsonar.organization=styler-inc'
