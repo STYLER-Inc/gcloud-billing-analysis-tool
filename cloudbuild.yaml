@@ -1,10 +1,6 @@
 # This cloud build _must_ run in a PR trigger,
 # it relies on substitution variables such as the PR number
 steps:
-- id: 'git-checkout'
-  name: gcr.io/$PROJECT_ID/styler-git-checkout
-  args: ['$_HEAD_REPO_URL', '$_HEAD_BRANCH']
-
 - id: 'build-test-container'
   name: 'gcr.io/cloud-builders/docker'
   args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/python-cloudbuild-tests', '--target', 'test-overlay', '.' ]
