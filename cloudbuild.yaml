@@ -1,6 +1,6 @@
 steps:
 - id: 'git-checkout'
-  name: gcr.io/facy-development/styler-git-checkout
+  name: gcr.io/$PROJECT_ID/styler-git-checkout
   args: ['$_HEAD_REPO_URL', '$_HEAD_BRANCH']
 
 - id: 'build-test-container'
@@ -21,7 +21,7 @@ steps:
   waitFor: ['build-test-container']
 
 - id: 'sonarcloud-analysis'
-  name: 'gcr.io/${PROJECT_ID}/sonar-scanner:latest'
+  name: 'gcr.io/$PROJECT_ID/sonar-scanner:latest'
   args:
     - '-Dsonar.organization=styler-inc'
     - '-Dsonar.projectKey=STYLER-Inc_gcloud-billing-analysis-tool'
