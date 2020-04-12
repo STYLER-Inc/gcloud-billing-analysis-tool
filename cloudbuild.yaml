@@ -52,11 +52,7 @@ steps:
     - '-Dsonar.language=py'
     - '-Dsonar.python.pylint.reportPath=pylint.log'
     - '-Dsonar.python.coverage.reportPaths=coverage.xml'
-    - '-Dsonar.pullrequest.provider=github'
-    - '-Dsonar.pullrequest.github.repository=STYLER-Inc/gcloud-billing-analysis-tool'
     - '-Dsonar.pullrequest.key=$_PR_NUMBER'
-    - '-Dsonar.pullrequest.branch=$_HEAD_BRANCH'
-    - '-Dsonar.pullrequest.base=$_BASE_BRANCH'
   secretEnv: ['sonarcloudLogin']
   waitFor: ['build-sonar-scanner', 'run-pylint', 'run-pytest']
 
