@@ -33,7 +33,7 @@ steps:
     - '-Dsonar.python.pylint.reportPath=pylint.log'
     - '-Dsonar.python.coverage.reportPaths=coverage.xml'
     - '-Dsonar.pullrequest.key=$_PR_NUMBER'
-  secretEnv: ['sonarcloudLogin']
+  secretEnv: ['SONARCLOUD_LOGIN']
   waitFor: ['run-pylint', 'run-pytest']
 
 secrets:
