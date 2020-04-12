@@ -28,15 +28,15 @@ steps:
   args:
     - '-c'
     - |
-      '/launch.sh '
-      '-Dsonar.organization=styler-inc '
-      '-Dsonar.projectKey=STYLER-Inc_gcloud-billing-analysis-tool '
-      '-Dsonar.sources=. '
-      '-Dsonar.host.url=https://sonarcloud.io '
-      '-Dsonar.login=$$SONARCLOUD_LOGIN '
-      '-Dsonar.python.pylint.reportPath=pylint.log '
-      '-Dsonar.python.coverage.reportPaths=coverage.xml '
-      '-Dsonar.pullrequest.key=$_PR_NUMBER'
+      /launch.sh \
+      -Dsonar.organization=styler-inc \
+      -Dsonar.projectKey=STYLER-Inc_gcloud-billing-analysis-tool \
+      -Dsonar.sources=. \
+      -Dsonar.host.url=https://sonarcloud.io \
+      -Dsonar.login=$$SONARCLOUD_LOGIN \
+      -Dsonar.python.pylint.reportPath=pylint.log \
+      -Dsonar.python.coverage.reportPaths=coverage.xml \
+      -Dsonar.pullrequest.key=$_PR_NUMBER
   secretEnv: ['SONARCLOUD_LOGIN']
   waitFor: ['run-pylint', 'run-pytest']
 
