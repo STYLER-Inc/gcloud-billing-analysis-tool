@@ -34,9 +34,9 @@ pipenv run pylint **/*.py
 
 ## CI
 
-The cloud build uses a community version cloud builder for [sonarqube](https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/sonarqube) which must hav been built in the project running the cloud build before run.
+Depends on [sonarqube](https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/sonarqube) to have been built and pushed to the container registry with version `4.2.0.1873` or later.
 
-It also needs to be built with version `4.2.0.1873` or later.
+Also depends on [cloud-builders-git-checkout](https://github.com/STYLER-Inc/cloud-builders-git-checkout) having been built and pushed.
 
 ### Sonarcloud
 
