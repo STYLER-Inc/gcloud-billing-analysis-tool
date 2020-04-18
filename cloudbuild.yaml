@@ -41,6 +41,6 @@ steps:
   waitFor: ['run-pylint', 'run-pytest']
 
 secrets:
-- kmsKeyName: projects/facy-development/locations/global/keyRings/gcloud-billing-analysis-tool-build/cryptoKeys/sonarcloudLogin
+- kmsKeyName: projects/facy-staging/locations/global/keyRings/staging-cloudbuild/cryptoKeys/sonarcloud-access-key
   secretEnv:
-    SONARCLOUD_LOGIN: CiQA4VLMkFZI/hCZ1pVxhSAlGDMbF9eJeBYbbP75W513J4LvClISUgAf4zou85j5wFKtJZFFAfx0Xv8zowoWRci6V98d3AZIStPojLtg0pJqf4Z8ccQmEIm04iK+cnVPdTHopcc5D2EqxA43mjctE7coaUM91GyuMl8= 
+    SONARCLOUD_LOGIN: CiQApP2x8e8HFFNhgkrJGWqbzuM+0rWQmjz5Ofd1Ka5QwnVnuTASUgAX+GvQ71nkLsxQ+bnuvLZmePh57Ahhj32l9ctWMCUBBIYWnu6nKyprXOcbBK8+sQ+haEa7jeDZBumgUI86jdrhMeLnl5CE4cy/D8GGbg1ESDA=
