@@ -1,9 +1,22 @@
 # This cloud build _must_ run in a PR trigger,
 # it relies on substitution variables such as the PR number
 steps:
+- id: 'git-clone'
+  name: 'gcr.io/cloud-builders/git'
+  entrypoint: '/bin/sh'
+  args: 
+    - '-c'
+    - git clone ${_HEAD_REPO_URL} git-repo
+
 - id: 'git-checkout'
-  name: gcr.io/$PROJECT_ID/styler-git-checkout
-  args: ['$_HEAD_REPO_URL', '$_HEAD_BRANCH']
+  name: 'gcr.io/cloud-builders/git'
+  entrypoint: /bin/sh
+  args:
+  - '-c'
+  - |
+    cd git-repo
+    git checkout ${_HEAD_BRANCH}
+  waitFor: ['git-clone']
 
 - id: 'build-test-container'
   name: 'gcr.io/cloud-builders/docker'
@@ -13,18 +26,21 @@ steps:
 - id: 'run-pylint'
   name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
   entrypoint: 'bash'
+  dir: '/workspace/git-repo'
   args: ['-c', '(pipenv run pylint **/*.py -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > pylint.log) || exit 0']
   waitFor: ['build-test-container']
 
 - id: 'run-pytest'
   name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
   entrypoint: 'bash'
+  dir: '/workspace/git-repo'
   args: ['-c', 'pipenv run coverage run --source=. --module pytest && pipenv run coverage xml']
   waitFor: ['build-test-container']
 
 - id: 'sonarcloud-analysis'
   name: 'gcr.io/$PROJECT_ID/sonar-scanner:latest'
   entrypoint: 'bash' # neeed to run in bash to decrypt secret key
+  dir: '/workspace/git-repo'
   args:
     - '-c'
     - |
