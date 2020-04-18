@@ -23,7 +23,7 @@ See `settings.py` for other settings.
 Run tests:
 
 ```shell script
-pipenv run pytest --cov-report=html --cov=*
+pipenv run pytest --cov-report=html --cov=.
 ```
 
 Before checking in, keep the code clean!
@@ -31,3 +31,24 @@ Before checking in, keep the code clean!
 ```shell script
 pipenv run pylint **/*.py
 ```
+
+## CI
+
+Depends on [sonarqube](https://github.com/GoogleCloudPlatform/cloud-builders-community/tree/master/sonarqube) to have been built and pushed to the container registry with version `4.2.0.1873` or later.
+
+Also depends on [cloud-builders-git-checkout](https://github.com/STYLER-Inc/cloud-builders-git-checkout) having been built and pushed.
+
+### Sonarcloud
+
+In order to upload analysis results to Sonarcloud a secret key is required. You can update this secret key by running:
+
+```shell script
+echo -n $SECRET_KEY | gcloud kms encrypt \
+  --plaintext-file=- \  # - reads from stdin
+  --ciphertext-file=- \  # - writes to stdout
+  --location=global \
+  --keyring=gcloud-billing-analysis-tool-build \
+  --key=sonarcloudLogin | base64
+```
+
+Then copying the output base64 string into the cloudbuild file.

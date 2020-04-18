@@ -1,0 +1,62 @@
+# This cloud build _must_ run in a PR trigger,
+# it relies on substitution variables such as the PR number
+steps:
+- id: 'git-clone'
+  name: 'gcr.io/cloud-builders/git'
+  entrypoint: '/bin/sh'
+  args: 
+    - '-c'
+    - git clone ${_HEAD_REPO_URL} git-repo
+
+- id: 'git-checkout'
+  name: 'gcr.io/cloud-builders/git'
+  entrypoint: /bin/sh
+  args:
+  - '-c'
+  - |
+    cd git-repo
+    git checkout ${_HEAD_BRANCH}
+  waitFor: ['git-clone']
+
+- id: 'build-test-container'
+  name: 'gcr.io/cloud-builders/docker'
+  args: [ 'build', '-t', 'gcr.io/$PROJECT_ID/python-cloudbuild-tests', '--target', 'test-overlay', '.' ]
+  waitFor: ['git-checkout']
+
+- id: 'run-pylint'
+  name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
+  entrypoint: 'bash'
+  dir: '/workspace/git-repo'
+  args: ['-c', '(pipenv run pylint **/*.py -r n --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" > pylint.log) || exit 0']
+  waitFor: ['build-test-container']
+
+- id: 'run-pytest'
+  name: 'gcr.io/$PROJECT_ID/python-cloudbuild-tests'
+  entrypoint: 'bash'
+  dir: '/workspace/git-repo'
+  args: ['-c', 'pipenv run coverage run --source=. --module pytest && pipenv run coverage xml']
+  waitFor: ['build-test-container']
+
+- id: 'sonarcloud-analysis'
+  name: 'gcr.io/$PROJECT_ID/sonar-scanner:latest'
+  entrypoint: 'bash' # neeed to run in bash to decrypt secret key
+  dir: '/workspace/git-repo'
+  args:
+    - '-c'
+    - |
+      /launch.sh \
+      -Dsonar.organization=styler-inc \
+      -Dsonar.projectKey=STYLER-Inc_gcloud-billing-analysis-tool \
+      -Dsonar.sources=. \
+      -Dsonar.host.url=https://sonarcloud.io \
+      -Dsonar.login=$$SONARCLOUD_LOGIN \
+      -Dsonar.python.pylint.reportPath=pylint.log \
+      -Dsonar.python.coverage.reportPaths=coverage.xml \
+      -Dsonar.pullrequest.key=$_PR_NUMBER
+  secretEnv: ['SONARCLOUD_LOGIN']
+  waitFor: ['run-pylint', 'run-pytest']
+
+secrets:
+- kmsKeyName: projects/facy-staging/locations/global/keyRings/staging-cloudbuild/cryptoKeys/sonarcloud-access-key
+  secretEnv:
+    SONARCLOUD_LOGIN: CiQApP2x8e8HFFNhgkrJGWqbzuM+0rWQmjz5Ofd1Ka5QwnVnuTASUgAX+GvQ71nkLsxQ+bnuvLZmePh57Ahhj32l9ctWMCUBBIYWnu6nKyprXOcbBK8+sQ+haEa7jeDZBumgUI86jdrhMeLnl5CE4cy/D8GGbg1ESDA=
