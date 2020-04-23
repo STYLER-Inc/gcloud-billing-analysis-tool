@@ -35,14 +35,12 @@ from datetime import date, timedelta
 from typing import Union
 
 from google.cloud import bigquery
+from google.cloud.bigquery.client import Client
 
 from messenger import send_slack_message as send_slack_message_to_channel
 from settings import Settings
 
-
 SETTINGS = Settings()
-SETTINGS.load_from_environment()
-CLIENT = bigquery.Client()
 
 def send_slack_message(text: str = None,
                        blocks: list = None):
@@ -56,7 +54,7 @@ def send_slack_message(text: str = None,
     )
     
 
-def get_project_ids_with_monthly_cost() -> list:
+def get_project_ids_with_monthly_cost(client: Client) -> list:
     """Gets a list of all project IDs within the billing data from BigQuery.
     Does not include projects for which cost was 0 in the past month.
 
@@ -75,7 +73,7 @@ def get_project_ids_with_monthly_cost() -> list:
           AND project.id IS NOT NULL
           AND cost > 0;
         """)
-    query_job = CLIENT.query(query)
+    query_job = client.query(query)
     return [row.pid for row in query_job.result() if row.pid is not None]
 
 
@@ -93,7 +91,8 @@ def round_cost_value(cost: float,
     return round(cost, precision)
 
 
-def get_cost_filter_project_daily_interval(project_id: str,
+def get_cost_filter_project_daily_interval(client: Client,
+                                           project_id: str,
                                            days_ago: int) -> dict:
     """Gets cost data for a specified number of days ago for a specified project.
 
@@ -125,7 +124,7 @@ def get_cost_filter_project_daily_interval(project_id: str,
         GROUP BY currency
         LIMIT 1;
         """)
-    query_job = CLIENT.query(query)
+    query_job = client.query(query)
     rows_iter = query_job.result(max_results=1)
     rows = list(rows_iter)
 
@@ -142,7 +141,7 @@ def get_cost_filter_project_daily_interval(project_id: str,
     }
 
 
-def get_gcp_daily_total_cost() -> dict:
+def get_gcp_daily_total_cost(client: Client) -> dict:
     """Gets cost data for the past day for all projects.
 
     Returns:
@@ -162,7 +161,7 @@ def get_gcp_daily_total_cost() -> dict:
         GROUP BY currency
         LIMIT 1;
         """)
-    query_job = CLIENT.query(query)
+    query_job = client.query(query)
     rows_iter = query_job.result(max_results=1)
     rows = list(rows_iter)
 
@@ -180,7 +179,7 @@ def get_gcp_daily_total_cost() -> dict:
     }
 
 
-def get_gcp_monthly_total_cost() -> dict:
+def get_gcp_monthly_total_cost(client: Client) -> dict:
     """Gets cost data for the past month for all projects.
 
     Returns:
@@ -201,7 +200,7 @@ def get_gcp_monthly_total_cost() -> dict:
         GROUP BY currency
         LIMIT 1;
         """)
-    query_job = CLIENT.query(query)
+    query_job = client.query(query)
     rows_iter = query_job.result(max_results=1)
     rows = list(rows_iter)
     return {
@@ -212,6 +211,7 @@ def get_gcp_monthly_total_cost() -> dict:
 
 
 def get_gcp_project_daily_top_services(
+        client: Client,
         project_id: str,
         number: int = SETTINGS.NUMBER_OF_TOP_SERVICES_TO_INVESTIGATE) -> list:
     """Gets data on daily top `number` of the highest costing services on the
@@ -237,7 +237,7 @@ def get_gcp_project_daily_top_services(
         ORDER BY(cost) DESC
         LIMIT {number};
         """)
-    query_job = CLIENT.query(query)
+    query_job = client.query(query)
     rows_iter = query_job.result()
     top_services = []
     for row in rows_iter:
@@ -314,7 +314,7 @@ def get_status(
     return SETTINGS.STATUS_NOMINAL
 
 
-def get_costs(project_ids: list) -> list:
+def get_costs(client: Client, project_ids: list) -> list:
     """Gets costs for the past two days for each project ID in the list.
     The two-day data used to perform a comparison and determine whether the
     project is nominal status or not.
@@ -326,9 +326,9 @@ def get_costs(project_ids: list) -> list:
         Cost data for all projects, with the `project_id` as the uppermost key.
     """
     costs = []
-    for project_id in get_project_ids_with_monthly_cost():
-        one_day_ago = get_cost_filter_project_daily_interval(project_id, 1)
-        two_days_ago = get_cost_filter_project_daily_interval(project_id, 2)
+    for project_id in get_project_ids_with_monthly_cost(client):
+        one_day_ago = get_cost_filter_project_daily_interval(client, project_id, 1)
+        two_days_ago = get_cost_filter_project_daily_interval(client, project_id, 2)
         status = get_status(one_day_ago['cost'], two_days_ago['cost'])
 
         project_costs = {
@@ -341,13 +341,14 @@ def get_costs(project_ids: list) -> list:
         # Get info on highest costing services if `SETTINGS.STATUS_WARNING`
         if status == SETTINGS.STATUS_WARNING:
             project_costs['top_services'] = get_gcp_project_daily_top_services(
+                client,
                 project_id
             )
         costs.append(project_costs)
     return costs
 
 
-def get_analysis() -> dict:
+def get_analysis(client: Client) -> dict:
     """Utilise the methods in this module to perform cost analysis on all GCP
     projects and return that data.
 
@@ -366,8 +367,8 @@ def get_analysis() -> dict:
 
     """
     # Days remaining used to determined projected cost
-    past_day = get_gcp_daily_total_cost()
-    past_month = get_gcp_monthly_total_cost()
+    past_day = get_gcp_daily_total_cost(client)
+    past_month = get_gcp_monthly_total_cost(client)
     days_remaining = compute_days_remaining_in_present_month()
 
     # Get the projected cost
@@ -381,7 +382,7 @@ def get_analysis() -> dict:
                                         past_month['cost_sum'])
 
     # Get and sort breakdown based on most expensive cost
-    breakdown = get_costs(get_project_ids_with_monthly_cost())
+    breakdown = get_costs(client, get_project_ids_with_monthly_cost(client))
     sorted_breakdown = sorted(
         breakdown,
         key=lambda x: x['one_day_ago']['cost'],
@@ -590,14 +591,14 @@ def send_summary_to_slack(summary_data: dict) -> None:
     ])
 
 
-def slack_notify() -> None:
+def slack_notify(client: Client) -> None:
     """Prepares analysis data and sends it to Slack.
 
     Returns:
         None
 
     """
-    analysis_data = get_analysis()
+    analysis_data = get_analysis(client)
 
     # Base Message
     base_message = [
@@ -628,10 +629,17 @@ def slack_notify() -> None:
     send_slack_message(blocks=[make_slack_message_divider()])
     send_summary_to_slack(analysis_data['summary'])
 
+def run():
+    """Executes the analysis and posts to slack
+    """
+    client = bigquery.Client()
+    SETTINGS.load_from_environment()
+    slack_notify(client)
 
 def subscriber(data: dict, context: dict):
-    slack_notify()
-
+    """Cloud function entrypoint
+    """
+    run()
 
 if __name__ == '__main__':
-    slack_notify()
+    run()
