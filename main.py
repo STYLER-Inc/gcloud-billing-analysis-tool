@@ -34,7 +34,6 @@ import calendar
 from datetime import date, timedelta
 from typing import Union
 
-from google.cloud import bigquery
 from google.cloud.bigquery.client import Client
 
 from messenger import send_slack_message as send_slack_message_to_channel
