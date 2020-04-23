@@ -632,7 +632,7 @@ def slack_notify(client: Client) -> None:
 def run():
     """Executes the analysis and posts to slack
     """
-    client = bigquery.Client()
+    client = Client()
     SETTINGS.load_from_environment()
     slack_notify(client)
 
